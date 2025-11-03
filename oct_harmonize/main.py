@@ -58,6 +58,7 @@ def parse_args():
     p.add_argument("--undo_log", action="store_true", help="Heuristic undo of log/gamma compression.")
     p.add_argument("--normalize", action="store_true", help="Percentile normalization to [0,1].")
     p.add_argument("--rpe_flatten", action="store_true", help="(Stub) simple RPE flattening.")
+    p.add_argument("--bitdepth", type=int, default=8, help="Bit depth for output images (8 or 16). Default: 8.")
 
     # Interpolation
     p.add_argument("--interp", choices=["linear", "bspline", "nearest"], default=os.getenv("INTERP", "bspline"))
@@ -113,7 +114,7 @@ def main():
             out = percentile_normalize(out)
 
         Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-        save_bscan_image(out, args.output, dtype_hint=dtype)
+        save_bscan_image(out, args.output, dtype_hint=dtype, bitdepth=args.bitdepth, assume_scaled=args.normalize)
         print(f"[OK] Saved canonical B-scan to {args.output}")
         return
 
@@ -128,7 +129,7 @@ def main():
         out_dir = Path(args.output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
 
-        files = list_pngs_in_dir(in_dir)
+        files = list_pngs_in_dir(in_dir)  # assumes PNG/JPG/TIFF; keep your helper
         if not files:
             raise ValueError(f"No PNG/JPG/TIFF images found in {in_dir}")
 
@@ -160,8 +161,12 @@ def main():
             if args.normalize:
                 out = percentile_normalize(out)
 
-            out_path = out_dir / f.name  # keep same filename
-            save_bscan_image(out, str(out_path), dtype_hint=dtype)
+            # choose extension by bit depth (16-bit -> .tif, else keep original)
+            suffix = ".tif" if args.bitdepth == 16 else f.suffix
+            out_path = (out_dir / f.name).with_suffix(suffix)
+
+            # use out_path (NOT args.output) in folder mode
+            save_bscan_image(out, str(out_path), dtype_hint=dtype, bitdepth=args.bitdepth, assume_scaled=args.normalize)
             print(f"[OK] {f.name} -> {out_path}")
 
         print(f"[DONE] Processed {len(files)} images into {out_dir}")

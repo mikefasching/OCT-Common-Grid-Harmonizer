@@ -3,16 +3,21 @@ from scipy.ndimage import gaussian_filter1d
 
 def maybe_undo_log_gamma(arr: np.ndarray, gamma: float = 1.0):
     """
-    Lightweight 'undo log' placeholder:
-    If input intensities look log-compressed (0..1), apply expm1 and optional gamma.
-    For vendor-accurate linearization, replace with the true inverse transform.
+    Heuristic 'undo log'. Expects input roughly in [0,1].
+    If a PNG/JPG was loaded (0..255), normalize first.
     """
     a = arr.astype(np.float32)
-    a = np.clip(a, 0, None)
+    # normalize if it looks like 8-bit
+    if np.nanmax(a) > 2.0:
+        a = a / 255.0
+
+    a = np.clip(a, 0.0, None)
     a = np.expm1(a)  # inverse of log1p-like compression (heuristic)
     if gamma != 1.0:
         a = np.power(a, 1.0 / gamma)
-    return a
+    # re-normalize to [0,1] for downstream steps
+    hi = np.percentile(a, 99.9); lo = np.percentile(a, 0.1)
+    return np.zeros_like(a) if hi <= lo else np.clip((a - lo) / (hi - lo), 0.0, 1.0)
 
 def percentile_normalize(arr: np.ndarray, p_low=1.0, p_high=99.0):
     lo = np.percentile(arr, p_low)

@@ -38,7 +38,7 @@ This installs Python 3.11, SimpleITK, imageio, NumPy, and SciPy in a slim contai
 All images in the input folder share the same vendor spacings.
 
 ```bash
-docker run --rm -v "$PWD":/data octcommon   --mode bscan_dir   --input_dir /data/raw_pngs   --output_dir /data/processed   --src_axial_um 1.96   --src_lateral_um 11.7   --canon_axial_um 3.0   --canon_lateral_um 12.0   --out_axial_px 640   --out_lateral_px 384   --interp bspline   --normalize
+docker run --rm -v "$PWD":/data octcommon   --mode bscan_dir   --input_dir /data/raw_pngs   --output_dir /data/processed   --src_axial_um 1.96   --src_lateral_um 11.7   --canon_axial_um 3.0   --canon_lateral_um 12.0   --out_axial_px 384   --out_lateral_px 640   --interp bspline   --normalize   --bitdepth 16
 ```
 
 > Zeiss → `--src_axial_um 1.96`, `--src_lateral_um 11.7`  
@@ -52,7 +52,7 @@ with the same filename.
 ### Single B-scan (PNG/JPG/TIFF → PNG)
 
 ```bash
-docker run --rm -v "$PWD":/data octcommon   --mode bscan   --input /data/zeiss_bscan.png   --output /data/zeiss_canon.png   --src_axial_um 1.96   --src_lateral_um 11.7   --canon_axial_um 3.0   --canon_lateral_um 12.0   --out_axial_px 640   --out_lateral_px 384   --interp bspline   --normalize
+docker run --rm -v "$PWD":/data octcommon   --mode bscan   --input /data/zeiss_bscan.png   --output /data/zeiss_canon.png   --src_axial_um 1.96   --src_lateral_um 11.7   --canon_axial_um 3.0   --canon_lateral_um 12.0   --out_axial_px 384   --out_lateral_px 640   --interp bspline   --normalize   --bitdepth 16
 ```
 
 ---
@@ -60,7 +60,7 @@ docker run --rm -v "$PWD":/data octcommon   --mode bscan   --input /data/zeiss_b
 ### Full Volume (NIfTI/MHD/TIFF stack → NIfTI)
 
 ```bash
-docker run --rm -v "$PWD":/data octcommon   --mode volume   --input /data/heidelberg.nii.gz   --output /data/heidelberg_canon.nii.gz   --src_axial_um 3.87   --src_lateral_um 6.0   --src_inter_bscan_um 30.0   --canon_axial_um 3.0   --canon_lateral_um 12.0   --canon_inter_bscan_um 24.0   --out_axial_px 640   --out_lateral_px 384   --out_slices 64   --interp bspline   --normalize
+docker run --rm -v "$PWD":/data octcommon   --mode volume   --input /data/heidelberg.nii.gz   --output /data/heidelberg_canon.nii.gz   --src_axial_um 3.87   --src_lateral_um 6.0   --src_inter_bscan_um 30.0   --canon_axial_um 3.0   --canon_lateral_um 12.0   --canon_inter_bscan_um 24.0   --out_axial_px 640   --out_lateral_px 384   --out_slices 64   --interp bspline   --normalize   --bitdepth 16
 ```
 
 ---
@@ -74,6 +74,7 @@ docker run --rm -v "$PWD":/data octcommon   --mode volume   --input /data/heidel
 | **Spacing (µm)** | `--src_axial_um`, `--src_lateral_um`, `--src_inter_bscan_um` | Physical spacing of the input image (micrometers per pixel). These values come from the scanner’s metadata. Examples: Zeiss ≈ (1.96, 11.7), Heidelberg ≈ (3.87, 11.5). |
 |  | `--canon_axial_um`, `--canon_lateral_um`, `--canon_inter_bscan_um` | Target *canonical* spacing after harmonization (defines your common grid). Example: 3.0 µm axial, 12.0 µm lateral ensures identical physical scale across scanners. |
 | **Output size (px)** | `--out_axial_px`, `--out_lateral_px`, `--out_slices` | Final pixel dimensions after resampling. Used to standardize all scans to the same shape. <br> - If set smaller than native → center crop (loss of periphery). <br> - If set larger → padding (edge repeat). <br> - Omit to keep full physical field of view. |
+| **Output precision** | `--bitdepth` | Output bit depth for saved images (8 or 16). Controls the dynamic range and precision of exported B-scans or volumes. <br><br> 🔹 **8-bit** (default): Values scaled to 0–255 for visualization or compact storage. <br> 🔹 **16-bit**: Values scaled to 0–65535, preserving full reflectivity precision for research or quantitative analysis. <br><br> 16-bit output is recommended for scientific reproducibility and intensity-based modeling. When set, the pipeline automatically saves in `.tif` format if not otherwise specified. |
 | **Interpolation** | `--interp` | Interpolation used during resampling: <br> 🔹 `linear` – bilinear interpolation; fast, slightly blurrier edges. <br> 🔹 `bspline` – cubic B-spline; smooth gradients, ideal for medical images (recommended). <br> 🔹 `nearest` – nearest-neighbor; use only for segmentation masks or discrete labels. |
 | **Preprocessing** | `--undo_log` | Approximate inverse of scanner log/gamma compression. Restores linear reflectivity from display-range OCT images (PNG/JPEG). Recommended for Zeiss/Heidelberg exports which store log-scaled data. |
 |  | `--normalize` | Robust percentile normalization (typically 1–99%) mapping intensity range to [0, 1]. Reduces scanner brightness bias and stabilizes model training. Disable if you need absolute reflectivity values for analysis. |

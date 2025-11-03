@@ -13,20 +13,32 @@ def load_bscan_image(path: str):
     dtype = arr.dtype
     return arr.astype(np.float32), dtype
 
-def save_bscan_image(arr: np.ndarray, path: str, dtype_hint=None):
+def save_bscan_image(arr: np.ndarray, path: str, dtype_hint=None, bitdepth: int = 8, assume_scaled: bool = False):
     """
-    Save as 8-bit PNG for convenience. Adjust to 16-bit if needed.
+    Save B-scan as 8-bit or 16-bit.
+    If assume_scaled=True, `arr` is already in [0,1] (no percentile windowing here).
     """
-    # Robust scaling to [0,1]
-    hi = np.percentile(arr, 99.9)
-    lo = np.percentile(arr, 0.1)
-    if hi <= lo:
-        out = np.zeros_like(arr, dtype=np.uint8)
+    if assume_scaled:
+        scaled = np.clip(arr, 0.0, 1.0).astype(np.float32)
     else:
-        a = (arr - lo) / (hi - lo)
-        a = np.clip(a, 0.0, 1.0)
-        out = (a * 255.0).astype(np.uint8)
-    iio.imwrite(Path(path), out)
+        hi = np.percentile(arr, 99.9)
+        lo = np.percentile(arr, 0.1)
+        if hi <= lo:
+            scaled = np.zeros_like(arr, dtype=np.float32)
+        else:
+            scaled = np.clip((arr - lo) / (hi - lo), 0.0, 1.0).astype(np.float32)
+
+    if bitdepth == 16:
+        out = (scaled * 65535.0).astype(np.uint16)
+    else:
+        out = (scaled * 255.0).astype(np.uint8)
+
+    p = Path(path)
+    if p.suffix.lower() not in [".png", ".tif", ".tiff"]:
+        p = p.with_suffix(".tif" if bitdepth == 16 else ".png")
+
+    iio.imwrite(p, out)
+
 
 def load_volume(path: str):
     """
