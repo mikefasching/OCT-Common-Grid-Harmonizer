@@ -3,7 +3,7 @@
 A lightweight Python + Docker pipeline for **resampling Zeiss/Heidelberg OCT B-scans or volumes**
 onto a **shared canonical grid** (same physical spacing and image size).
 
-This ensures geometric consistency across scanners — ideal for cross-vendor model training
+This ensures geometric consistency across scanners, ideal for cross-vendor model training
 (e.g., CycleGAN style translation or a vendor-invariant encoder like VILE).
 
 ---
@@ -14,7 +14,7 @@ This ensures geometric consistency across scanners — ideal for cross-vendor mo
 - 📂 **Folder mode** – process all PNG/JPG/TIFF in a directory (`--mode bscan_dir`)
 - 🧱 **3D mode** – process full OCT volumes (NIfTI/MHD/TIFF stack → NIfTI)
 - 🔧 Fully configurable canonical spacing and output size
-- 🧠 Optional preprocessing (log/gamma undo, percentile normalization, RPE-flatten stub)
+- 🧠 Optional preprocessing (log/gamma undo, percentile normalization, RPE-flatten stub) (needs further development)
 - 🐳 Docker-friendly: adjust everything via CLI flags or environment variables
 
 ---
