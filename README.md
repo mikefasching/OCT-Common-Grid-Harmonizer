@@ -8,18 +8,18 @@ This ensures geometric consistency across scanners, ideal for cross-vendor model
 
 ---
 
-## 🧭 Features
+## Features
 
-- 🖼️ **2D mode** – process a single B-scan (`--mode bscan`)
-- 📂 **Folder mode** – process all PNG/JPG/TIFF in a directory (`--mode bscan_dir`)
-- 🧱 **3D mode** – process full OCT volumes (NIfTI/MHD/TIFF stack → NIfTI)
-- 🔧 Fully configurable canonical spacing and output size
-- 🧠 Optional preprocessing (log/gamma undo, percentile normalization, RPE-flatten stub) (needs further development)
-- 🐳 Docker-friendly: adjust everything via CLI flags or environment variables
+- **2D mode** – process a single B-scan (`--mode bscan`)
+- **Folder mode** – process all PNG/JPG/TIFF in a directory (`--mode bscan_dir`)
+- **3D mode** – process full OCT volumes (NIfTI/MHD/TIFF stack → NIfTI)
+- Fully configurable canonical spacing and output size
+- Optional preprocessing (log/gamma undo, percentile normalization, RPE-flatten stub) (needs further development)
+- Docker-friendly: adjust everything via CLI flags or environment variables
 
 ---
 
-## 🧰 Installation (Docker)
+## Installation (Docker)
 
 Build the Docker image:
 
@@ -31,9 +31,9 @@ This installs Python 3.11, SimpleITK, imageio, NumPy, and SciPy in a slim contai
 
 ---
 
-## ⚙️ Usage
+## Usage
 
-### 1️⃣ Folder of PNGs (single vendor → `processed/`)
+### Folder of PNGs (single vendor → `processed/`)
 
 All images in the input folder share the same vendor spacings.
 
@@ -49,7 +49,7 @@ with the same filename.
 
 ---
 
-### 2️⃣ Single B-scan (PNG/JPG/TIFF → PNG)
+### Single B-scan (PNG/JPG/TIFF → PNG)
 
 ```bash
 docker run --rm -v "$PWD":/data octcommon   --mode bscan   --input /data/zeiss_bscan.png   --output /data/zeiss_canon.png   --src_axial_um 1.96   --src_lateral_um 11.7   --canon_axial_um 3.0   --canon_lateral_um 12.0   --out_axial_px 640   --out_lateral_px 384   --interp bspline   --normalize
@@ -57,7 +57,7 @@ docker run --rm -v "$PWD":/data octcommon   --mode bscan   --input /data/zeiss_b
 
 ---
 
-### 3️⃣ Full Volume (NIfTI/MHD/TIFF stack → NIfTI)
+### Full Volume (NIfTI/MHD/TIFF stack → NIfTI)
 
 ```bash
 docker run --rm -v "$PWD":/data octcommon   --mode volume   --input /data/heidelberg.nii.gz   --output /data/heidelberg_canon.nii.gz   --src_axial_um 3.87   --src_lateral_um 6.0   --src_inter_bscan_um 30.0   --canon_axial_um 3.0   --canon_lateral_um 12.0   --canon_inter_bscan_um 24.0   --out_axial_px 640   --out_lateral_px 384   --out_slices 64   --interp bspline   --normalize
@@ -65,7 +65,7 @@ docker run --rm -v "$PWD":/data octcommon   --mode volume   --input /data/heidel
 
 ---
 
-## 🧮 Parameters
+## Parameters
 
 | Category | Flag | Description |
 |-----------|------|-------------|
@@ -83,7 +83,7 @@ docker run --rm -v "$PWD":/data octcommon   --mode volume   --input /data/heidel
 
 ---
 
-## 🌍 Environment Variables
+## Environment Variables
 
 You can override defaults globally (no CLI flag needed):
 
@@ -99,7 +99,7 @@ You can override defaults globally (no CLI flag needed):
 
 ---
 
-## 🧪 Output
+## Output
 
 - `bscan` / `bscan_dir`: **8-bit PNG** (normalized)
 - `volume`: **NIfTI (.nii.gz)** (float32)
@@ -107,7 +107,7 @@ You can override defaults globally (no CLI flag needed):
 
 ---
 
-## 🧱 Conventions
+## Conventions
 
 - NumPy arrays → `[z, x, y] = [axial, lateral, slices]`
 - SimpleITK uses `(x, y, z)` internally (handled automatically)
@@ -115,7 +115,7 @@ You can override defaults globally (no CLI flag needed):
 
 ---
 
-## ✅ Example Results
+## Example Results
 
 | Vendor | Input Size (px) | Spacing (µm) | Canonical Spacing (µm) | Output Size (px) | Canonical FOV (µm) |
 |---------|-----------------|---------------|--------------------------|------------------|---------------------|
@@ -124,7 +124,7 @@ You can override defaults globally (no CLI flag needed):
 
 ---
 
-## ⚠️ Notes
+## Notes
 
 - **RPE flattening** is a placeholder — replace with proper segmentation for production.
 - Use **16-bit output** for research-grade data.
@@ -132,7 +132,7 @@ You can override defaults globally (no CLI flag needed):
 
 ---
 
-## 🧩 Troubleshooting
+## Troubleshooting
 
 | Issue | Cause | Fix |
 |-------|--------|-----|
@@ -143,13 +143,13 @@ You can override defaults globally (no CLI flag needed):
 
 ---
 
-## 🧑‍💻 License
+## License
 
 MIT License — free to use for research and academic work.
 
 ---
 
-## 🙌 Acknowledgement
+## Acknowledgement
 
 If this tool helps your research, please acknowledge:
 
