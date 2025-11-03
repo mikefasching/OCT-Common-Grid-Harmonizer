@@ -1,0 +1,4 @@
+numpy
+SimpleITK
+imageio>=2.34
+scipy
